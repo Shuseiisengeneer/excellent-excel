@@ -341,11 +341,17 @@
   }
 
   function safePublish(adapter, name, value) {
-    if (adapter && typeof adapter.publish === "function") adapter.publish(name, value);
+    if (!adapter || typeof adapter.publish !== "function") return;
+    try {
+      adapter.publish(name, value);
+    } catch (_error) {}
   }
 
   function safeTrigger(adapter, name) {
-    if (adapter && typeof adapter.trigger === "function") adapter.trigger(name);
+    if (!adapter || typeof adapter.trigger !== "function") return;
+    try {
+      adapter.trigger(name);
+    } catch (_error) {}
   }
 
   function buildStyleText(id, style) {
