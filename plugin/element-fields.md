@@ -19,6 +19,7 @@ Use these field keys exactly; the JavaScript snippets read `properties.<key>`.
 | `selectable_rows` | Checkbox | yes/no | yes | no |
 | `movable_columns` | Checkbox | yes/no | yes | no |
 | `resizable_columns` | Checkbox | yes/no | yes | no |
+| `show_toolbar` | Checkbox | yes/no | yes | yes |
 | `placeholder` | Static Text | text | yes | yes |
 | `safe_export` | Checkbox | yes/no | yes | no |
 | `sheet_name` | Static Text | text | yes | no |
@@ -49,6 +50,7 @@ Recommended defaults:
   "selectable_rows": true,
   "movable_columns": true,
   "resizable_columns": true,
+  "show_toolbar": true,
   "placeholder": "No data",
   "safe_export": true,
   "sheet_name": "Sheet1",

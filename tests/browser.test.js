@@ -37,6 +37,7 @@ test("Bubble element harness renders, publishes states, and exports data", async
       states: window.__bubbleTest.states,
       events: window.__bubbleTest.events,
       hasTabulator: window.__bubbleTest.hasTabulator(),
+      toolbarButtons: document.querySelectorAll(".bst-toolbar button").length,
       renderedRows: document.querySelectorAll(".tabulator-row").length,
       renderedCells: document.querySelectorAll(".tabulator-cell").length,
       xss: window.__xss
@@ -46,9 +47,19 @@ test("Bubble element harness renders, publishes states, and exports data", async
     assert.equal(initial.states.row_count, 3);
     assert.equal(initial.states.is_dirty, false);
     assert.ok(initial.events.includes("ready"));
+    assert.equal(initial.toolbarButtons, 3);
     assert.ok(initial.renderedRows >= 3);
     assert.ok(initial.renderedCells >= 6);
     assert.equal(initial.xss, false);
+
+    page.once("dialog", (dialog) => dialog.accept("Extra Note"));
+    await page.click(".bst-add-column");
+    await page.waitForFunction(() => {
+      return JSON.parse(window.__bubbleTest.states.data_json)[0].Extra_Note === "";
+    });
+
+    await page.click(".bst-add-row");
+    await page.waitForFunction(() => JSON.parse(window.__bubbleTest.states.data_json).length === 4);
 
     await page.evaluate(() => {
       window.__bubbleTest.instance.data.bst.addRow(JSON.stringify({
@@ -58,7 +69,7 @@ test("Bubble element harness renders, publishes states, and exports data", async
       }));
     });
 
-    await page.waitForFunction(() => JSON.parse(window.__bubbleTest.states.data_json).length === 4);
+    await page.waitForFunction(() => JSON.parse(window.__bubbleTest.states.data_json).length === 5);
 
     const afterAdd = await page.evaluate(() => ({
       rows: window.__bubbleTest.getRows(),
@@ -67,9 +78,11 @@ test("Bubble element harness renders, publishes states, and exports data", async
       sheetNames: window.__bubbleTest.buildWorkbookSheetNames()
     }));
 
-    assert.equal(afterAdd.rows.length, 4);
-    assert.equal(afterAdd.states.row_count, 4);
+    assert.equal(afterAdd.rows.length, 5);
+    assert.equal(afterAdd.states.row_count, 5);
     assert.equal(afterAdd.states.is_dirty, true);
+    assert.equal(afterAdd.rows[0].Extra_Note, "");
+    assert.match(afterAdd.csv, /Extra Note/);
     assert.match(afterAdd.csv, /'@unsafe/);
     assert.deepEqual(afterAdd.sheetNames, ["Demo"]);
 

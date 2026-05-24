@@ -20,6 +20,7 @@
     selectableRows: true,
     movableColumns: true,
     resizableColumns: true,
+    showToolbar: true,
     placeholder: "No data",
     safeExport: true,
     sheetName: "Sheet1",
@@ -307,6 +308,7 @@
       selectableRows: asBoolean(config.selectableRows, defaults.selectableRows),
       movableColumns: asBoolean(config.movableColumns, defaults.movableColumns),
       resizableColumns: asBoolean(config.resizableColumns, defaults.resizableColumns),
+      showToolbar: asBoolean(config.showToolbar, defaults.showToolbar),
       placeholder: config.placeholder || defaults.placeholder,
       safeExport: asBoolean(config.safeExport, defaults.safeExport),
       sheetName: config.sheetName || defaults.sheetName,
@@ -358,6 +360,12 @@
     var rootClass = ".bst-" + id;
     return [
       rootClass + " { width:100%; height:100%; min-height:80px; color:" + style.text + "; font-size:" + Number(style.fontSize) + "px; }",
+      rootClass + " { display:flex; flex-direction:column; box-sizing:border-box; overflow:hidden; }",
+      rootClass + " .bst-toolbar { display:flex; flex:0 0 auto; gap:6px; align-items:center; padding:6px; background:" + style.headerBackground + "; border:1px solid " + style.border + "; border-bottom:0; box-sizing:border-box; }",
+      rootClass + " .bst-toolbar button { border:1px solid " + style.border + "; background:#fff; color:" + style.text + "; border-radius:4px; cursor:pointer; font:inherit; font-size:12px; line-height:1; padding:6px 8px; }",
+      rootClass + " .bst-toolbar button:hover { border-color:" + style.accent + "; color:" + style.accent + "; }",
+      rootClass + " .bst-table-surface { flex:1 1 auto; min-height:0; width:100%; }",
+      rootClass + " .bst-table-surface .tabulator { height:100%; }",
       rootClass + " .bst-fallback-table { width:100%; border-collapse:collapse; table-layout:fixed; }",
       rootClass + " .bst-fallback-table th { background:" + style.headerBackground + "; color:" + style.headerText + "; border:1px solid " + style.border + "; height:" + Number(style.rowHeight) + "px; padding:6px 8px; text-align:left; }",
       rootClass + " .bst-fallback-table td { background:" + style.rowBackground + "; color:" + style.text + "; border:1px solid " + style.border + "; height:" + Number(style.rowHeight) + "px; padding:6px 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }",
@@ -421,6 +429,7 @@
     this.id = "bst" + (++instanceSeq);
     this.container.classList.add("bst-root", "bst-" + this.id);
     this.table = null;
+    this.tableElement = null;
     this.styleElement = null;
     this.config = normalizeConfig({});
     this.rows = [];
@@ -474,6 +483,7 @@
     this.destroyTable();
     this.styleElement = installScopedStyle(this.id, config.style);
     this.container.style.height = config.height;
+    this.buildShell();
 
     if (root.Tabulator) {
       this.renderTabulator();
@@ -506,7 +516,54 @@
       this.table.destroy();
     }
     this.table = null;
+    this.tableElement = null;
     removeChildren(this.container);
+  };
+
+  TableController.prototype.buildShell = function () {
+    if (this.config.showToolbar) {
+      this.container.appendChild(this.createToolbar());
+    }
+    this.tableElement = root.document.createElement("div");
+    this.tableElement.className = "bst-table-surface";
+    this.container.appendChild(this.tableElement);
+  };
+
+  TableController.prototype.createToolbar = function () {
+    var self = this;
+    var toolbar = root.document.createElement("div");
+    toolbar.className = "bst-toolbar";
+
+    var addRowButton = root.document.createElement("button");
+    addRowButton.type = "button";
+    addRowButton.className = "bst-add-row";
+    addRowButton.textContent = "+ Row";
+    addRowButton.addEventListener("click", function () {
+      self.addRow();
+    });
+    toolbar.appendChild(addRowButton);
+
+    var addColumnButton = root.document.createElement("button");
+    addColumnButton.type = "button";
+    addColumnButton.className = "bst-add-column";
+    addColumnButton.textContent = "+ Column";
+    addColumnButton.addEventListener("click", function () {
+      var title = root.prompt ? root.prompt("Column name", "New Column") : "New Column";
+      if (title == null) return;
+      self.addColumn(title);
+    });
+    toolbar.appendChild(addColumnButton);
+
+    var deleteRowsButton = root.document.createElement("button");
+    deleteRowsButton.type = "button";
+    deleteRowsButton.className = "bst-delete-rows";
+    deleteRowsButton.textContent = "Delete Row";
+    deleteRowsButton.addEventListener("click", function () {
+      self.deleteSelectedRows();
+    });
+    toolbar.appendChild(deleteRowsButton);
+
+    return toolbar;
   };
 
   TableController.prototype.renderTabulator = function () {
@@ -516,7 +573,7 @@
       data: clone(this.rows),
       columns: clone(this.columns),
       layout: this.config.layout,
-      height: this.config.height,
+      height: "100%",
       placeholder: this.config.placeholder,
       movableColumns: this.config.movableColumns,
       resizableColumnFit: this.config.resizableColumns,
@@ -532,7 +589,7 @@
       options.paginationSize = this.config.pageSize;
     }
 
-    this.table = new root.Tabulator(this.container, options);
+    this.table = new root.Tabulator(this.tableElement || this.container, options);
 
     if (typeof this.table.on === "function") {
       this.table.on("tableBuilt", function () {
@@ -628,7 +685,7 @@
       tbody.appendChild(tr);
     });
     table.appendChild(tbody);
-    this.container.appendChild(table);
+    (this.tableElement || this.container).appendChild(table);
   };
 
   TableController.prototype.getData = function () {
@@ -701,6 +758,7 @@
       selectableRows: this.config.selectableRows,
       movableColumns: this.config.movableColumns,
       resizableColumns: this.config.resizableColumns,
+      showToolbar: this.config.showToolbar,
       placeholder: this.config.placeholder,
       safeExport: this.config.safeExport,
       sheetName: this.config.sheetName,
@@ -710,9 +768,20 @@
     });
   };
 
+  TableController.prototype.emptyRow = function () {
+    var row = {};
+    this.columns.forEach(function (column) {
+      row[column.field] = "";
+    });
+    return row;
+  };
+
   TableController.prototype.addRow = function (rowInput) {
-    var row = parseJsonInput(rowInput, {}, "row_json");
+    var row = isEmpty(rowInput) ? this.emptyRow() : parseJsonInput(rowInput, {}, "row_json");
     if (!isPlainObject(row)) throw new Error("row_json must be an object");
+    this.columns.forEach(function (column) {
+      if (row[column.field] == null) row[column.field] = "";
+    });
     var nextRows = this.getData();
     nextRows.push(row);
     var self = this;
@@ -721,6 +790,42 @@
       self.publishAll();
       safeTrigger(self.adapter, "data_changed");
     });
+  };
+
+  TableController.prototype.addColumn = function (titleInput) {
+    var title = String(titleInput || "").trim();
+    if (!title) return;
+    var used = {};
+    this.columns.forEach(function (column) {
+      used[column.field] = true;
+    });
+    var field = safeFieldName(title, this.columns.length, used);
+    var column = {
+      title: title,
+      field: field,
+      minWidth: 100
+    };
+    if (this.config.editable) column.editor = "input";
+
+    var nextColumns = clone(this.columns);
+    nextColumns.push(column);
+    var nextRows = this.getData().map(function (row) {
+      row[field] = "";
+      return row;
+    });
+    if (!nextRows.length) nextRows.push(this.emptyRow());
+    nextRows.forEach(function (row) {
+      row[field] = "";
+    });
+
+    var self = this;
+    this.render(Object.assign({}, this.config, {
+      dataInput: nextRows,
+      columnsInput: nextColumns
+    }));
+    this.dirty = true;
+    this.publishAll();
+    safeTrigger(self.adapter, "data_changed");
   };
 
   TableController.prototype.deleteSelectedRows = function () {
@@ -823,6 +928,7 @@
       selectableRows: properties.selectable_rows,
       movableColumns: properties.movable_columns,
       resizableColumns: properties.resizable_columns,
+      showToolbar: properties.show_toolbar,
       placeholder: properties.placeholder,
       safeExport: properties.safe_export,
       sheetName: properties.sheet_name,
