@@ -35,6 +35,11 @@
     sheetName: "Sheet1",
     csvFileName: "table.csv",
     xlsxFileName: "table.xlsx",
+    defaultColumnAlign: "left",
+    defaultHeaderAlign: "left",
+    defaultColumnWidth: null,
+    headerHeight: 36,
+    showGrid: true,
     style: {
       fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       borderRadius: 6,
@@ -94,6 +99,13 @@
     if (value == null || value === "") return fallback;
     var number = Number(value);
     return Number.isFinite(number) ? number : fallback;
+  }
+
+  function validateAlign(value, fallback) {
+    if (value == null || value === "") return fallback;
+    var normalized = String(value).trim().toLowerCase();
+    if (normalized === "left" || normalized === "center" || normalized === "right") return normalized;
+    return fallback;
   }
 
   function asSize(value, fallback) {
@@ -348,6 +360,11 @@
       sheetName: config.sheetName || defaults.sheetName,
       csvFileName: config.csvFileName || defaults.csvFileName,
       xlsxFileName: config.xlsxFileName || defaults.xlsxFileName,
+      defaultColumnAlign: validateAlign(config.defaultColumnAlign, defaults.defaultColumnAlign),
+      defaultHeaderAlign: validateAlign(config.defaultHeaderAlign, defaults.defaultHeaderAlign),
+      defaultColumnWidth: asNumber(config.defaultColumnWidth, defaults.defaultColumnWidth),
+      headerHeight: asNumber(config.headerHeight, defaults.headerHeight),
+      showGrid: asBoolean(config.showGrid, defaults.showGrid),
       styleOverrides: styleOverrides,
       style: style
     };
@@ -391,7 +408,8 @@
     } catch (_error) {}
   }
 
-  function buildStyleText(id, style) {
+  function buildStyleText(id, style, layout) {
+    layout = layout || {};
     var rootClass = ".bst-" + id;
     var toolbarGap = asSize(style.toolbarGap, defaults.style.toolbarGap);
     var cellPaddingX = asSize(style.cellPaddingX, defaults.style.cellPaddingX);
@@ -399,34 +417,39 @@
     var borderRadius = asSize(style.borderRadius, defaults.style.borderRadius);
     var buttonRadius = asSize(style.toolbarButtonRadius, defaults.style.toolbarButtonRadius);
     var buttonFontSize = asSize(style.toolbarButtonFontSize, defaults.style.toolbarButtonFontSize);
+    var headerHeight = Number.isFinite(Number(layout.headerHeight)) ? Number(layout.headerHeight) : defaults.headerHeight;
+    var showGrid = layout.showGrid !== false;
+    var defaultColumnAlign = validateAlign(layout.defaultColumnAlign, defaults.defaultColumnAlign);
+    var defaultHeaderAlign = validateAlign(layout.defaultHeaderAlign, defaults.defaultHeaderAlign);
+    var gridBorderColor = showGrid ? style.border : "transparent";
     return [
       rootClass + " { width:100%; height:100%; min-height:80px; color:" + style.text + "; font-size:" + Number(style.fontSize) + "px; font-family:" + style.fontFamily + "; background:" + style.tableBackground + "; border-radius:" + borderRadius + "; box-shadow:" + style.tableShadow + "; }",
       rootClass + " { display:flex; flex-direction:column; box-sizing:border-box; overflow:hidden; }",
-      rootClass + " .bst-toolbar { display:flex; flex:0 0 auto; gap:" + toolbarGap + "; align-items:center; padding:6px; background:" + style.toolbarBackground + "; border:1px solid " + style.border + "; border-bottom:0; box-sizing:border-box; }",
+      rootClass + " .bst-toolbar { display:flex; flex:0 0 auto; gap:" + toolbarGap + "; align-items:center; padding:6px; background:" + style.toolbarBackground + "; border:1px solid " + gridBorderColor + "; border-bottom:0; box-sizing:border-box; }",
       rootClass + " .bst-toolbar button { border:1px solid " + style.toolbarButtonBorder + "; background:" + style.toolbarButtonBackground + "; color:" + style.toolbarButtonText + "; border-radius:" + buttonRadius + "; cursor:pointer; font:inherit; font-size:" + buttonFontSize + "; line-height:1; padding:6px 8px; transition:background-color 120ms ease, border-color 120ms ease, color 120ms ease; }",
       rootClass + " .bst-toolbar button:hover { background:" + style.toolbarButtonHoverBackground + "; border-color:" + style.accent + "; color:" + style.toolbarButtonText + "; }",
       rootClass + " .bst-toolbar button:focus-visible { outline:2px solid " + style.accent + "; outline-offset:1px; }",
       rootClass + " .bst-table-surface { flex:1 1 auto; min-height:0; width:100%; background:" + style.tableBackground + "; }",
       rootClass + " .bst-table-surface .tabulator { height:100%; background:" + style.tableBackground + "; border-radius:" + borderRadius + "; overflow:hidden; }",
       rootClass + " .bst-fallback-table { width:100%; border-collapse:collapse; table-layout:fixed; background:" + style.tableBackground + "; }",
-      rootClass + " .bst-fallback-table th { background:" + style.headerBackground + "; color:" + style.headerText + "; border:1px solid " + style.border + "; height:" + Number(style.rowHeight) + "px; padding:" + cellPaddingY + " " + cellPaddingX + "; text-align:left; font-weight:" + style.headerFontWeight + "; }",
-      rootClass + " .bst-fallback-table td { background:" + style.rowBackground + "; color:" + style.text + "; border:1px solid " + style.border + "; height:" + Number(style.rowHeight) + "px; padding:" + cellPaddingY + " " + cellPaddingX + "; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }",
+      rootClass + " .bst-fallback-table th { background:" + style.headerBackground + "; color:" + style.headerText + "; border:1px solid " + gridBorderColor + "; height:" + headerHeight + "px; padding:" + cellPaddingY + " " + cellPaddingX + "; text-align:" + defaultHeaderAlign + "; font-weight:" + style.headerFontWeight + "; }",
+      rootClass + " .bst-fallback-table td { background:" + style.rowBackground + "; color:" + style.text + "; border:1px solid " + gridBorderColor + "; height:" + Number(style.rowHeight) + "px; padding:" + cellPaddingY + " " + cellPaddingX + "; text-align:" + defaultColumnAlign + "; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }",
       rootClass + " .bst-fallback-table tbody tr:nth-child(even) td { background:" + style.alternateRowBackground + "; }",
       rootClass + " .bst-fallback-table tbody tr:hover td { background:" + style.rowHoverBackground + "; }",
       rootClass + " .bst-fallback-table tbody tr.is-selected td { outline:2px solid " + style.accent + "; outline-offset:-2px; }",
-      rootClass + " .tabulator { border-color:" + style.border + "; color:" + style.text + "; font-size:" + Number(style.fontSize) + "px; font-family:" + style.fontFamily + "; }",
-      rootClass + " .tabulator .tabulator-header { background:" + style.headerBackground + "; border-color:" + style.border + "; color:" + style.headerText + "; font-weight:" + style.headerFontWeight + "; }",
-      rootClass + " .tabulator .tabulator-header .tabulator-col { background:" + style.headerBackground + "; border-color:" + style.border + "; color:" + style.headerText + "; font-weight:" + style.headerFontWeight + "; }",
+      rootClass + " .tabulator { border-color:" + gridBorderColor + "; color:" + style.text + "; font-size:" + Number(style.fontSize) + "px; font-family:" + style.fontFamily + "; }",
+      rootClass + " .tabulator .tabulator-header { background:" + style.headerBackground + "; border-color:" + gridBorderColor + "; color:" + style.headerText + "; font-weight:" + style.headerFontWeight + "; min-height:" + headerHeight + "px; }",
+      rootClass + " .tabulator .tabulator-header .tabulator-col { background:" + style.headerBackground + "; border-color:" + gridBorderColor + "; color:" + style.headerText + "; font-weight:" + style.headerFontWeight + "; height:" + headerHeight + "px; }",
       rootClass + " .tabulator .tabulator-header .tabulator-col .tabulator-col-content { padding:" + cellPaddingY + " " + cellPaddingX + "; }",
       rootClass + " .tabulator-row { min-height:" + Number(style.rowHeight) + "px; background:" + style.rowBackground + "; color:" + style.text + "; }",
       rootClass + " .tabulator-row.tabulator-row-even { background:" + style.alternateRowBackground + "; }",
       rootClass + " .tabulator-row:hover { background:" + style.rowHoverBackground + "; }",
-      rootClass + " .tabulator-row .tabulator-cell { border-color:" + style.border + "; padding:" + cellPaddingY + " " + cellPaddingX + "; }",
+      rootClass + " .tabulator-row .tabulator-cell { border-color:" + gridBorderColor + "; padding:" + cellPaddingY + " " + cellPaddingX + "; }",
       rootClass + " .tabulator-row.tabulator-selected { background:" + style.selectedRowBackground + "; }"
     ].join("\n");
   }
 
-  function installScopedStyle(id, style) {
+  function installScopedStyle(id, style, layout) {
     if (!root.document) return null;
     var styleElement = root.document.querySelector("style[data-bst-style='" + id + "']");
     if (!styleElement) {
@@ -434,7 +457,7 @@
       styleElement.setAttribute("data-bst-style", id);
       root.document.head.appendChild(styleElement);
     }
-    styleElement.textContent = buildStyleText(id, style);
+    styleElement.textContent = buildStyleText(id, style, layout);
     return styleElement;
   }
 
@@ -526,7 +549,12 @@
     this.changedCell = null;
 
     this.destroyTable();
-    this.styleElement = installScopedStyle(this.id, config.style);
+    this.styleElement = installScopedStyle(this.id, config.style, {
+      headerHeight: config.headerHeight,
+      showGrid: config.showGrid,
+      defaultColumnAlign: config.defaultColumnAlign,
+      defaultHeaderAlign: config.defaultHeaderAlign
+    });
     this.container.style.height = config.height;
     this.buildShell();
 
@@ -626,7 +654,9 @@
       columnDefaults: {
         resizable: this.config.resizableColumns,
         headerSort: true,
-        hozAlign: "left"
+        hozAlign: this.config.defaultColumnAlign,
+        headerHozAlign: this.config.defaultHeaderAlign,
+        width: this.config.defaultColumnWidth || undefined
       }
     };
 
@@ -684,10 +714,13 @@
     table.className = "bst-fallback-table";
     var thead = root.document.createElement("thead");
     var headerRow = root.document.createElement("tr");
+    var fallbackDefaultWidth = self.config.defaultColumnWidth;
     this.columns.forEach(function (column) {
       var th = root.document.createElement("th");
       th.textContent = column.title || column.field;
-      if (column.width) th.style.width = typeof column.width === "number" ? column.width + "px" : column.width;
+      var widthValue = column.width != null ? column.width : fallbackDefaultWidth;
+      if (widthValue) th.style.width = typeof widthValue === "number" ? widthValue + "px" : widthValue;
+      if (column.headerHozAlign) th.style.textAlign = column.headerHozAlign;
       headerRow.appendChild(th);
     });
     thead.appendChild(headerRow);
@@ -709,6 +742,7 @@
       self.columns.forEach(function (column) {
         var td = root.document.createElement("td");
         td.textContent = row[column.field] == null ? "" : String(row[column.field]);
+        if (column.hozAlign) td.style.textAlign = column.hozAlign;
         if (self.config.editable) {
           td.contentEditable = "true";
           td.addEventListener("blur", function () {
@@ -980,6 +1014,11 @@
       sheetName: properties.sheet_name,
       csvFileName: properties.csv_file_name,
       xlsxFileName: properties.xlsx_file_name,
+      defaultColumnAlign: properties.default_column_align,
+      defaultHeaderAlign: properties.default_header_align,
+      defaultColumnWidth: properties.default_column_width,
+      headerHeight: properties.header_height,
+      showGrid: properties.show_grid,
       style: {
         fontFamily: properties.font_family,
         borderRadius: properties.border_radius,

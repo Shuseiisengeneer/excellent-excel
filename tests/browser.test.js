@@ -46,7 +46,9 @@ test("Bubble element harness renders, publishes states, and exports data", async
         toolbarButtonRadius: getComputedStyle(document.querySelector(".bst-toolbar button")).borderRadius,
         rootShadow: getComputedStyle(document.querySelector(".bst-root")).boxShadow,
         cellPaddingLeft: getComputedStyle(document.querySelector(".tabulator-cell")).paddingLeft,
-        headerWeight: getComputedStyle(document.querySelector(".tabulator .tabulator-header .tabulator-col")).fontWeight
+        headerWeight: getComputedStyle(document.querySelector(".tabulator .tabulator-header .tabulator-col")).fontWeight,
+        headerHeight: getComputedStyle(document.querySelector(".tabulator .tabulator-header .tabulator-col")).height,
+        headerAlign: getComputedStyle(document.querySelector(".tabulator .tabulator-header .tabulator-col .tabulator-col-content")).textAlign
       },
       xss: window.__xss
     }));
@@ -64,6 +66,7 @@ test("Bubble element harness renders, publishes states, and exports data", async
     assert.equal(initial.styles.rootShadow, "none");
     assert.equal(initial.styles.cellPaddingLeft, "12px");
     assert.equal(initial.styles.headerWeight, "700");
+    assert.equal(initial.styles.headerHeight, "44px");
     assert.equal(initial.xss, false);
 
     page.once("dialog", (dialog) => dialog.accept("Extra Note"));

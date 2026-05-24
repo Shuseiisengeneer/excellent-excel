@@ -51,6 +51,11 @@ Use these field keys exactly; the JavaScript snippets read `properties.<key>`.
 | `toolbar_gap` | Static Number | number | yes | yes |
 | `table_background_color` | Color | color | yes | yes |
 | `table_shadow` | Static Text | text | yes | yes |
+| `default_column_align` | Dropdown | `left,center,right` | yes | yes |
+| `default_header_align` | Dropdown | `left,center,right` | yes | yes |
+| `default_column_width` | Static Number | number | yes | yes |
+| `header_height` | Static Number | number | yes | yes |
+| `show_grid` | Checkbox | yes/no | yes | yes |
 | `style_overrides_json` | Static Text | text | yes | no |
 | `debug` | Checkbox | yes/no | yes | no |
 
@@ -100,6 +105,11 @@ Recommended defaults:
   "toolbar_gap": 6,
   "table_background_color": "#ffffff",
   "table_shadow": "0 8px 24px rgba(15, 23, 42, 0.08)",
+  "default_column_align": "left",
+  "default_header_align": "left",
+  "default_column_width": "",
+  "header_height": 36,
+  "show_grid": true,
   "style_overrides_json": "{}"
 }
 ```
