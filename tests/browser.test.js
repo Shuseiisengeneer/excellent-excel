@@ -40,6 +40,14 @@ test("Bubble element harness renders, publishes states, and exports data", async
       toolbarButtons: document.querySelectorAll(".bst-toolbar button").length,
       renderedRows: document.querySelectorAll(".tabulator-row").length,
       renderedCells: document.querySelectorAll(".tabulator-cell").length,
+      styles: {
+        fontFamily: getComputedStyle(document.querySelector(".bst-root")).fontFamily,
+        toolbarBackground: getComputedStyle(document.querySelector(".bst-toolbar")).backgroundColor,
+        toolbarButtonRadius: getComputedStyle(document.querySelector(".bst-toolbar button")).borderRadius,
+        rootShadow: getComputedStyle(document.querySelector(".bst-root")).boxShadow,
+        cellPaddingLeft: getComputedStyle(document.querySelector(".tabulator-cell")).paddingLeft,
+        headerWeight: getComputedStyle(document.querySelector(".tabulator .tabulator-header .tabulator-col")).fontWeight
+      },
       xss: window.__xss
     }));
 
@@ -50,6 +58,12 @@ test("Bubble element harness renders, publishes states, and exports data", async
     assert.equal(initial.toolbarButtons, 3);
     assert.ok(initial.renderedRows >= 3);
     assert.ok(initial.renderedCells >= 6);
+    assert.match(initial.styles.fontFamily, /Inter/);
+    assert.equal(initial.styles.toolbarBackground, "rgb(240, 249, 255)");
+    assert.equal(initial.styles.toolbarButtonRadius, "8px");
+    assert.equal(initial.styles.rootShadow, "none");
+    assert.equal(initial.styles.cellPaddingLeft, "12px");
+    assert.equal(initial.styles.headerWeight, "700");
     assert.equal(initial.xss, false);
 
     page.once("dialog", (dialog) => dialog.accept("Extra Note"));

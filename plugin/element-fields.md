@@ -27,13 +27,31 @@ Use these field keys exactly; the JavaScript snippets read `properties.<key>`.
 | `xlsx_file_name` | Static Text | text | yes | no |
 | `header_background_color` | Color | color | yes | yes |
 | `header_text_color` | Color | color | yes | yes |
+| `header_font_weight` | Static Number | number | yes | yes |
 | `row_background_color` | Color | color | yes | yes |
 | `alternate_row_background_color` | Color | color | yes | yes |
+| `row_hover_background_color` | Color | color | yes | yes |
+| `selected_row_background_color` | Color | color | yes | yes |
 | `text_color` | Color | color | yes | yes |
 | `border_color` | Color | color | yes | yes |
 | `accent_color` | Color | color | yes | yes |
 | `font_size` | Static Number | number | yes | yes |
 | `row_height` | Static Number | number | yes | yes |
+| `font_family` | Static Text | text | yes | yes |
+| `border_radius` | Static Number | number | yes | yes |
+| `cell_padding_x` | Static Number | number | yes | yes |
+| `cell_padding_y` | Static Number | number | yes | yes |
+| `toolbar_background_color` | Color | color | yes | yes |
+| `toolbar_button_background_color` | Color | color | yes | yes |
+| `toolbar_button_text_color` | Color | color | yes | yes |
+| `toolbar_button_hover_background_color` | Color | color | yes | yes |
+| `toolbar_button_border_color` | Color | color | yes | yes |
+| `toolbar_button_radius` | Static Number | number | yes | yes |
+| `toolbar_button_font_size` | Static Number | number | yes | yes |
+| `toolbar_gap` | Static Number | number | yes | yes |
+| `table_background_color` | Color | color | yes | yes |
+| `table_shadow` | Static Text | text | yes | yes |
+| `style_overrides_json` | Static Text | text | yes | no |
 | `debug` | Checkbox | yes/no | yes | no |
 
 Recommended defaults:
@@ -58,13 +76,31 @@ Recommended defaults:
   "xlsx_file_name": "table.xlsx",
   "header_background_color": "#f8fafc",
   "header_text_color": "#0f172a",
+  "header_font_weight": 600,
   "row_background_color": "#ffffff",
   "alternate_row_background_color": "#f8fafc",
+  "row_hover_background_color": "#eef2ff",
+  "selected_row_background_color": "#dbeafe",
   "text_color": "#111827",
   "border_color": "#d1d5db",
   "accent_color": "#2563eb",
   "font_size": 14,
-  "row_height": 36
+  "row_height": 36,
+  "font_family": "Inter, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+  "border_radius": 6,
+  "cell_padding_x": 10,
+  "cell_padding_y": 6,
+  "toolbar_background_color": "#f8fafc",
+  "toolbar_button_background_color": "#ffffff",
+  "toolbar_button_text_color": "#111827",
+  "toolbar_button_hover_background_color": "#eff6ff",
+  "toolbar_button_border_color": "#d1d5db",
+  "toolbar_button_radius": 4,
+  "toolbar_button_font_size": 12,
+  "toolbar_gap": 6,
+  "table_background_color": "#ffffff",
+  "table_shadow": "0 8px 24px rgba(15, 23, 42, 0.08)",
+  "style_overrides_json": "{}"
 }
 ```
 

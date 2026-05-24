@@ -36,15 +36,32 @@
     csvFileName: "table.csv",
     xlsxFileName: "table.xlsx",
     style: {
+      fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      borderRadius: 6,
       headerBackground: "#f8fafc",
       headerText: "#0f172a",
+      headerFontWeight: 600,
       rowBackground: "#ffffff",
       alternateRowBackground: "#f8fafc",
+      rowHoverBackground: "#eef2ff",
+      selectedRowBackground: "#dbeafe",
       text: "#111827",
       border: "#d1d5db",
       accent: "#2563eb",
       fontSize: 14,
-      rowHeight: 36
+      rowHeight: 36,
+      cellPaddingX: 10,
+      cellPaddingY: 6,
+      toolbarBackground: "#f8fafc",
+      toolbarButtonBackground: "#ffffff",
+      toolbarButtonText: "#111827",
+      toolbarButtonHoverBackground: "#eff6ff",
+      toolbarButtonBorder: "#d1d5db",
+      toolbarButtonRadius: 4,
+      toolbarButtonFontSize: 12,
+      toolbarGap: 6,
+      tableBackground: "#ffffff",
+      tableShadow: "0 8px 24px rgba(15, 23, 42, 0.08)"
     }
   };
 
@@ -301,10 +318,18 @@
   function normalizeConfig(input) {
     var config = input || {};
     var styleInput = config.style || {};
+    var styleOverrides = config.styleOverrides || {};
     var style = {};
     Object.keys(defaults.style).forEach(function (key) {
       style[key] = styleInput[key] != null && styleInput[key] !== "" ? styleInput[key] : defaults.style[key];
     });
+    if (isPlainObject(styleOverrides)) {
+      Object.keys(styleOverrides).forEach(function (key) {
+        if (styleOverrides[key] != null && styleOverrides[key] !== "") {
+          style[key] = styleOverrides[key];
+        }
+      });
+    }
 
     return {
       dataInput: config.dataInput != null ? config.dataInput : [],
@@ -323,6 +348,7 @@
       sheetName: config.sheetName || defaults.sheetName,
       csvFileName: config.csvFileName || defaults.csvFileName,
       xlsxFileName: config.xlsxFileName || defaults.xlsxFileName,
+      styleOverrides: styleOverrides,
       style: style
     };
   }
@@ -367,26 +393,36 @@
 
   function buildStyleText(id, style) {
     var rootClass = ".bst-" + id;
+    var toolbarGap = asSize(style.toolbarGap, defaults.style.toolbarGap);
+    var cellPaddingX = asSize(style.cellPaddingX, defaults.style.cellPaddingX);
+    var cellPaddingY = asSize(style.cellPaddingY, defaults.style.cellPaddingY);
+    var borderRadius = asSize(style.borderRadius, defaults.style.borderRadius);
+    var buttonRadius = asSize(style.toolbarButtonRadius, defaults.style.toolbarButtonRadius);
+    var buttonFontSize = asSize(style.toolbarButtonFontSize, defaults.style.toolbarButtonFontSize);
     return [
-      rootClass + " { width:100%; height:100%; min-height:80px; color:" + style.text + "; font-size:" + Number(style.fontSize) + "px; }",
+      rootClass + " { width:100%; height:100%; min-height:80px; color:" + style.text + "; font-size:" + Number(style.fontSize) + "px; font-family:" + style.fontFamily + "; background:" + style.tableBackground + "; border-radius:" + borderRadius + "; box-shadow:" + style.tableShadow + "; }",
       rootClass + " { display:flex; flex-direction:column; box-sizing:border-box; overflow:hidden; }",
-      rootClass + " .bst-toolbar { display:flex; flex:0 0 auto; gap:6px; align-items:center; padding:6px; background:" + style.headerBackground + "; border:1px solid " + style.border + "; border-bottom:0; box-sizing:border-box; }",
-      rootClass + " .bst-toolbar button { border:1px solid " + style.border + "; background:#fff; color:" + style.text + "; border-radius:4px; cursor:pointer; font:inherit; font-size:12px; line-height:1; padding:6px 8px; }",
-      rootClass + " .bst-toolbar button:hover { border-color:" + style.accent + "; color:" + style.accent + "; }",
-      rootClass + " .bst-table-surface { flex:1 1 auto; min-height:0; width:100%; }",
-      rootClass + " .bst-table-surface .tabulator { height:100%; }",
-      rootClass + " .bst-fallback-table { width:100%; border-collapse:collapse; table-layout:fixed; }",
-      rootClass + " .bst-fallback-table th { background:" + style.headerBackground + "; color:" + style.headerText + "; border:1px solid " + style.border + "; height:" + Number(style.rowHeight) + "px; padding:6px 8px; text-align:left; }",
-      rootClass + " .bst-fallback-table td { background:" + style.rowBackground + "; color:" + style.text + "; border:1px solid " + style.border + "; height:" + Number(style.rowHeight) + "px; padding:6px 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }",
+      rootClass + " .bst-toolbar { display:flex; flex:0 0 auto; gap:" + toolbarGap + "; align-items:center; padding:6px; background:" + style.toolbarBackground + "; border:1px solid " + style.border + "; border-bottom:0; box-sizing:border-box; }",
+      rootClass + " .bst-toolbar button { border:1px solid " + style.toolbarButtonBorder + "; background:" + style.toolbarButtonBackground + "; color:" + style.toolbarButtonText + "; border-radius:" + buttonRadius + "; cursor:pointer; font:inherit; font-size:" + buttonFontSize + "; line-height:1; padding:6px 8px; transition:background-color 120ms ease, border-color 120ms ease, color 120ms ease; }",
+      rootClass + " .bst-toolbar button:hover { background:" + style.toolbarButtonHoverBackground + "; border-color:" + style.accent + "; color:" + style.toolbarButtonText + "; }",
+      rootClass + " .bst-toolbar button:focus-visible { outline:2px solid " + style.accent + "; outline-offset:1px; }",
+      rootClass + " .bst-table-surface { flex:1 1 auto; min-height:0; width:100%; background:" + style.tableBackground + "; }",
+      rootClass + " .bst-table-surface .tabulator { height:100%; background:" + style.tableBackground + "; border-radius:" + borderRadius + "; overflow:hidden; }",
+      rootClass + " .bst-fallback-table { width:100%; border-collapse:collapse; table-layout:fixed; background:" + style.tableBackground + "; }",
+      rootClass + " .bst-fallback-table th { background:" + style.headerBackground + "; color:" + style.headerText + "; border:1px solid " + style.border + "; height:" + Number(style.rowHeight) + "px; padding:" + cellPaddingY + " " + cellPaddingX + "; text-align:left; font-weight:" + style.headerFontWeight + "; }",
+      rootClass + " .bst-fallback-table td { background:" + style.rowBackground + "; color:" + style.text + "; border:1px solid " + style.border + "; height:" + Number(style.rowHeight) + "px; padding:" + cellPaddingY + " " + cellPaddingX + "; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }",
       rootClass + " .bst-fallback-table tbody tr:nth-child(even) td { background:" + style.alternateRowBackground + "; }",
+      rootClass + " .bst-fallback-table tbody tr:hover td { background:" + style.rowHoverBackground + "; }",
       rootClass + " .bst-fallback-table tbody tr.is-selected td { outline:2px solid " + style.accent + "; outline-offset:-2px; }",
-      rootClass + " .tabulator { border-color:" + style.border + "; color:" + style.text + "; font-size:" + Number(style.fontSize) + "px; }",
-      rootClass + " .tabulator .tabulator-header { background:" + style.headerBackground + "; border-color:" + style.border + "; color:" + style.headerText + "; }",
-      rootClass + " .tabulator .tabulator-header .tabulator-col { background:" + style.headerBackground + "; border-color:" + style.border + "; color:" + style.headerText + "; }",
+      rootClass + " .tabulator { border-color:" + style.border + "; color:" + style.text + "; font-size:" + Number(style.fontSize) + "px; font-family:" + style.fontFamily + "; }",
+      rootClass + " .tabulator .tabulator-header { background:" + style.headerBackground + "; border-color:" + style.border + "; color:" + style.headerText + "; font-weight:" + style.headerFontWeight + "; }",
+      rootClass + " .tabulator .tabulator-header .tabulator-col { background:" + style.headerBackground + "; border-color:" + style.border + "; color:" + style.headerText + "; font-weight:" + style.headerFontWeight + "; }",
+      rootClass + " .tabulator .tabulator-header .tabulator-col .tabulator-col-content { padding:" + cellPaddingY + " " + cellPaddingX + "; }",
       rootClass + " .tabulator-row { min-height:" + Number(style.rowHeight) + "px; background:" + style.rowBackground + "; color:" + style.text + "; }",
       rootClass + " .tabulator-row.tabulator-row-even { background:" + style.alternateRowBackground + "; }",
-      rootClass + " .tabulator-row .tabulator-cell { border-color:" + style.border + "; }",
-      rootClass + " .tabulator-row.tabulator-selected { background:" + style.accent + "22; }"
+      rootClass + " .tabulator-row:hover { background:" + style.rowHoverBackground + "; }",
+      rootClass + " .tabulator-row .tabulator-cell { border-color:" + style.border + "; padding:" + cellPaddingY + " " + cellPaddingX + "; }",
+      rootClass + " .tabulator-row.tabulator-selected { background:" + style.selectedRowBackground + "; }"
     ].join("\n");
   }
 
@@ -589,7 +625,8 @@
       selectableRows: this.config.selectableRows ? true : false,
       columnDefaults: {
         resizable: this.config.resizableColumns,
-        headerSort: true
+        headerSort: true,
+        hozAlign: "left"
       }
     };
 
@@ -944,16 +981,34 @@
       csvFileName: properties.csv_file_name,
       xlsxFileName: properties.xlsx_file_name,
       style: {
+        fontFamily: properties.font_family,
+        borderRadius: properties.border_radius,
         headerBackground: properties.header_background_color,
         headerText: properties.header_text_color,
+        headerFontWeight: properties.header_font_weight,
         rowBackground: properties.row_background_color,
         alternateRowBackground: properties.alternate_row_background_color,
+        rowHoverBackground: properties.row_hover_background_color,
+        selectedRowBackground: properties.selected_row_background_color,
         text: properties.text_color,
         border: properties.border_color,
         accent: properties.accent_color,
         fontSize: properties.font_size,
-        rowHeight: properties.row_height
-      }
+        rowHeight: properties.row_height,
+        cellPaddingX: properties.cell_padding_x,
+        cellPaddingY: properties.cell_padding_y,
+        toolbarBackground: properties.toolbar_background_color,
+        toolbarButtonBackground: properties.toolbar_button_background_color,
+        toolbarButtonText: properties.toolbar_button_text_color,
+        toolbarButtonHoverBackground: properties.toolbar_button_hover_background_color,
+        toolbarButtonBorder: properties.toolbar_button_border_color,
+        toolbarButtonRadius: properties.toolbar_button_radius,
+        toolbarButtonFontSize: properties.toolbar_button_font_size,
+        toolbarGap: properties.toolbar_gap,
+        tableBackground: properties.table_background_color,
+        tableShadow: properties.table_shadow
+      },
+      styleOverrides: parseJsonInput(properties.style_overrides_json, {}, "style_overrides_json")
     };
   }
 
