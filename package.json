@@ -1,0 +1,18 @@
+{
+  "name": "bubble-spreadsheet-table-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Bubble plugin snippets for an editable spreadsheet-like table with JSON and CSV/XLSX export.",
+  "scripts": {
+    "build": "node scripts/build-bubble-payload.js",
+    "test": "node --test tests/*.test.js",
+    "check:conflicts": "node --test tests/conflict-marker.test.js",
+    "verify:bubble": "node scripts/verify-bubble-runtime.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "playwright": "^1.59.1"
+  }
+}

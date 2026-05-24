@@ -1,0 +1,23 @@
+{
+  "generated_at": "2026-05-24T03:05:04.783Z",
+  "version": "0.1.0",
+  "shared_header_inline_html": "dist/shared_header_inline.html",
+  "shared_header_cdn_html": "plugin/shared_header_cdn.html",
+  "shared_header_local_assets_html": "plugin/shared_header_local_assets.html",
+  "element_initialize_js": "if (!window.BubbleSpreadsheetTable) {\n  throw new Error(\"BubbleSpreadsheetTable is not loaded. Add src/bubble-table-core.js in the plugin Shared HTML Header or Shared assets.\");\n}\n\nwindow.BubbleSpreadsheetTable.bubble.initialize(instance, context);\n",
+  "element_update_js": "if (!window.BubbleSpreadsheetTable) {\n  throw new Error(\"BubbleSpreadsheetTable is not loaded. Add src/bubble-table-core.js in the plugin Shared HTML Header or Shared assets.\");\n}\n\nwindow.BubbleSpreadsheetTable.bubble.update(instance, properties, context);\n",
+  "actions_js": {
+    "add_row": "if (!window.BubbleSpreadsheetTable) {\n  throw new Error(\"BubbleSpreadsheetTable is not loaded.\");\n}\n\nwindow.BubbleSpreadsheetTable.bubble.actions.addRow(instance, properties);\n",
+    "clear_dirty": "if (!window.BubbleSpreadsheetTable) {\n  throw new Error(\"BubbleSpreadsheetTable is not loaded.\");\n}\n\nwindow.BubbleSpreadsheetTable.bubble.actions.clearDirty(instance, properties);\n",
+    "delete_selected_rows": "if (!window.BubbleSpreadsheetTable) {\n  throw new Error(\"BubbleSpreadsheetTable is not loaded.\");\n}\n\nwindow.BubbleSpreadsheetTable.bubble.actions.deleteSelectedRows(instance, properties);\n",
+    "download_csv": "if (!window.BubbleSpreadsheetTable) {\n  throw new Error(\"BubbleSpreadsheetTable is not loaded.\");\n}\n\nwindow.BubbleSpreadsheetTable.bubble.actions.downloadCSV(instance, properties);\n",
+    "download_xlsx": "if (!window.BubbleSpreadsheetTable) {\n  throw new Error(\"BubbleSpreadsheetTable is not loaded.\");\n}\n\nwindow.BubbleSpreadsheetTable.bubble.actions.downloadXLSX(instance, properties);\n",
+    "refresh": "if (!window.BubbleSpreadsheetTable) {\n  throw new Error(\"BubbleSpreadsheetTable is not loaded.\");\n}\n\nwindow.BubbleSpreadsheetTable.bubble.actions.refresh(instance, properties);\n",
+    "set_data": "if (!window.BubbleSpreadsheetTable) {\n  throw new Error(\"BubbleSpreadsheetTable is not loaded.\");\n}\n\nwindow.BubbleSpreadsheetTable.bubble.actions.setData(instance, properties);\n"
+  },
+  "vendor_sri": {
+    "tabulator.min.css": "sha384-EQBNn3WbvE7jktBWfpQ9A2wxEX/i4xux1PaJmY5TUpeSfc3ulYZSxxXOZ4HXWLNd",
+    "tabulator.min.js": "sha384-pYxmWRni6PTDEhE3EUFDBSQ4KQcsBHtS3N+syMWwrtxs9QRtJkxkphTVQMXEdVjT",
+    "xlsx.full.min.js": "sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT"
+  }
+}
