@@ -444,7 +444,7 @@
       rootClass + " .tabulator-row { min-height:" + Number(style.rowHeight) + "px; background:" + style.rowBackground + "; color:" + style.text + "; }",
       rootClass + " .tabulator-row.tabulator-row-even { background:" + style.alternateRowBackground + "; }",
       rootClass + " .tabulator-row:hover { background:" + style.rowHoverBackground + "; }",
-      rootClass + " .tabulator-row .tabulator-cell { border-color:" + gridBorderColor + "; padding:" + cellPaddingY + " " + cellPaddingX + "; }",
+      rootClass + " .tabulator-row .tabulator-cell { border-color:" + gridBorderColor + "; padding:" + cellPaddingY + " " + cellPaddingX + "; min-height:" + Number(style.rowHeight) + "px; line-height:" + (Number(style.rowHeight) - Number(style.cellPaddingY) * 2) + "px; box-sizing:border-box; }",
       rootClass + " .tabulator-row.tabulator-selected { background:" + style.selectedRowBackground + "; }"
     ].join("\n");
   }
